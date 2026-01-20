@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Referral Journey Tracker - Enhanced</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        body { background-color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; color: #1e293b; }
+        .main-card { background: white; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden; }
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        thead th { background: #fcfcfd; padding: 12px; text-align: center; font-weight: 600; color: #64748b; border-bottom: 2px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
+        tbody td { padding: 12px; text-align: center; border-bottom: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; }
+        
+        .clickable-val { cursor: pointer; color: #2563eb; font-weight: 700; }
+        .clickable-val:hover { text-decoration: underline; background-color: #f1f5f9; }
+        .empty-val { color: #cbd5e1; }
+        
+        .btn-action {
+            display: inline-flex; align-items: center; gap: 4px; background: #2563eb;
+            color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600;
+        }
+
+        /* Modal Custom Styling */
+        .section-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em; margin-bottom: 8px; border-left: 4px solid #6366f1; padding-left: 8px; }
+    </style>
+</head>
+<body class="p-8">
+
+    <div id="modalOverlay" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onclick="closeModal()">
+        <div class="bg-white rounded-2xl p-6 max-w-4xl w-full shadow-2xl" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 id="modalTitle" class="text-xl font-800 text-slate-800">Log Detail</h2>
+                    <p id="modalDesc" class="text-slate-400 text-xs">Informasi detail perjalanan referral.</p>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-rose-500 transition-colors"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            
+            <div id="modalContentContainer" class="space-y-6">
+                </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-6">
+            <h1 class="text-2xl font-800 text-slate-800">Referral Journey Tracker</h1>
+        </header>
+
+        <div class="main-card">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Nama Nasabah</th>
+                            <th colspan="9">Referral Journey Status</th>
+                        </tr>
+                        <tr>
+                            <th>Blm Dist.</th>
+                            <th>Dist.</th>
+                            <th>Aktivitas</th>
+                            <th>Prospek</th>
+                            <th>Presentasi</th>
+                            <th>Closing</th>
+                            <th>Submit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-bold text-left px-4 text-blue-600">Andi Nasution</td>
+                            <td class="clickable-val" onclick="openLog('Andi Nasution', 'Belum Dist')">1</td>
+                            <td class="clickable-val" onclick="openLog('Andi Nasution', 'Distribusi')">2</td>
+                            <td class="clickable-val" onclick="openLog('Andi Nasution', 'Aktivitas')">1</td>
+                            <td class="clickable-val" onclick="openLog('Andi Nasution', 'Prospek')">4</td>
+                            <td class="clickable-val" onclick="openLog('Andi Nasution', 'Presentasi')">2</td>
+                            <td class="empty-val">-</td>
+                            <td class="empty-val">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openLog(name, stage) {
+            document.getElementById('modalTitle').innerText = `${stage}: ${name}`;
+            const container = document.getElementById('modalContentContainer');
+            container.innerHTML = ''; // Reset content
+
+            let sectionsHTML = '';
+
+            switch(stage) {
+                case 'Belum Dist':
+                    sectionsHTML = createTableSection("Data Referral", 
+                        ["Tanggal Referral", "LG Name", "Source"], 
+                        [["2024-06-01", "Budi Santoso", "LG Branch A"]]);
+                    break;
+                
+                case 'Distribusi':
+                    sectionsHTML = createTableSection("Data Distribusi", 
+                        ["Tanggal Distribusi", "Status"], 
+                        [["2024-06-02", "Distributed to Sales"]]);
+                    break;
+
+                case 'Aktivitas':
+                    sectionsHTML = createTableSection("Data Aktivitas", 
+                        ["Tanggal Aktivitas", "Status", "Tanggal Follow Up"], 
+                        [["2024-06-03", "Contacted", "2024-06-05"]]);
+                    break;
+
+                case 'Prospek':
+                case 'Presentasi':
+                    // Bagian 1: Data Status
+                    sectionsHTML += createTableSection(`Data ${stage}`, 
+                        [`Tanggal Input/${stage}`, "Last Update", "Status"], 
+                        [["2024-06-05", "2024-06-06", "APPROVE"]]);
+                    
+                    // Bagian 2: Log Aktivitas (Sesuai Permintaan)
+                    sectionsHTML += createTableSection("Log Aktivitas", 
+                        ["Tanggal Input", "Last Update", "Agenda"], 
+                        [
+                            ["2024-06-05 10:00", "2024-06-05 10:30", "Penjelasan Produ"],
+                            ["2024-06-06 14:00", "2024-06-06 14:45", "Penejelasan Simulasi"]
+                        ]);
+                    break;
+
+                case 'Closing':
+                    sectionsHTML = createTableSection("Data Closing", 
+                        ["Tanggal Closing", "Status Onsub"], 
+                        [["2024-06-10", "Ready to Submit"]]);
+                    break;
+
+                case 'Submit':
+                    sectionsHTML = createTableSection("Data Submission", 
+                        ["Tanggal Submission", "Status Onsub", "Status iClips"], 
+                        [["2024-06-12", "Submitted", "In Force"]]);
+                    break;
+            }
+
+            container.innerHTML = sectionsHTML;
+            showModal();
+        }
+
+        function createTableSection(title, headers, rows) {
+            let headerHTML = headers.map(h => `<th class="py-3 px-4 bg-slate-50 text-slate-500 font-bold text-[10px] uppercase border-b text-left">${h}</th>`).join('');
+            let rowsHTML = rows.map(row => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50">
+                    ${row.map(cell => `<td class="py-3 px-4 text-slate-600">${cell}</td>`).join('')}
+                </tr>
+            `).join('');
+
+            return `
+                <div>
+                    <div class="section-title">${title}</div>
+                    <div class="overflow-hidden border border-slate-100 rounded-lg">
+                        <table class="w-full">
+                            <thead><tr>${headerHTML}</tr></thead>
+                            <tbody>${rowsHTML}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showModal() {
+            document.getElementById('modalOverlay').classList.remove('hidden');
+            document.getElementById('modalOverlay').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.add('hidden');
+            document.getElementById('modalOverlay').classList.remove('flex');
+        }
+    </script>
+</body>
+</html>
